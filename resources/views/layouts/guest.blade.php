@@ -8,19 +8,18 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet">
-    <link href="/css/app.css?v=7" rel="stylesheet">
+    <link href="/css/app.css?v=9" rel="stylesheet">
     @stack('styles')
 </head>
 <body class="guest-body">
     <div class="institutional-bar"></div>
     <div class="guest-wrapper">
         <header class="guest-header text-center py-4">
+            <img src="/logoo.png" alt="Logo institucional" class="brand-logo brand-logo-guest mb-3">
             <div class="brand-badge mb-3">
                 <i class="bi bi-building"></i> Sistema institucional
             </div>
-            <h1 class="h3 mb-1 brand-title">
-                <i class="bi bi-calendar2-week me-2"></i>{{ config('app.name') }}
-            </h1>
+            <h1 class="h3 mb-1 brand-title">{{ config('app.name') }}</h1>
             <p class="text-muted mb-0">Registro de vacaciones del personal</p>
         </header>
 

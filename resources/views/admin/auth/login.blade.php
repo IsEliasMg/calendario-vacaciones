@@ -7,8 +7,8 @@
     <div class="col-md-5 col-lg-4">
         <div class="card-soft p-4 p-md-5">
             <div class="text-center mb-4">
-                <i class="bi bi-shield-lock text-primary" style="font-size: 2.5rem;"></i>
-                <h1 class="h4 fw-semibold mt-3">Panel administrativo</h1>
+                <img src="/logoo.png" alt="Logo institucional" class="brand-logo brand-logo-login mb-3">
+                <h1 class="h4 fw-semibold mt-2 brand-title">Panel administrativo</h1>
                 <p class="text-muted">Ingresa tus credenciales</p>
             </div>
 

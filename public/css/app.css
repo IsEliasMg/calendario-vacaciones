@@ -121,6 +121,29 @@ h1, h2, h3, .brand-title {
     font-weight: 700;
 }
 
+.brand-logo {
+    display: inline-block;
+    object-fit: contain;
+}
+
+.brand-logo-guest {
+    max-height: 88px;
+    width: auto;
+}
+
+.brand-logo-admin {
+    height: 36px;
+    width: auto;
+    background: #fff;
+    border-radius: 8px;
+    padding: 2px 4px;
+}
+
+.brand-logo-login {
+    max-height: 96px;
+    width: auto;
+}
+
 .card-soft {
     background: rgba(255, 255, 255, 0.92);
     border: 1px solid var(--border-soft);
