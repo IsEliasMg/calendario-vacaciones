@@ -15,9 +15,6 @@
     <div class="institutional-bar"></div>
     <div class="guest-wrapper">
         <header class="guest-header text-center py-4">
-            <div class="brand-badge mb-3">
-                Sistema institucional
-            </div>
             <h1 class="h3 mb-1 brand-title">{{ config('app.name') }}</h1>
             <p class="text-muted mb-0">Registro de vacaciones del personal</p>
         </header>
