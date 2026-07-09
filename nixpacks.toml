@@ -1,13 +1,34 @@
+providers = ["php"]
+
 [phases.setup]
-nixPkgs = ["php84", "php84Extensions.pdo_sqlite", "php84Extensions.pdo_pgsql", "php84Extensions.sqlite3", "php84Extensions.mbstring", "php84Extensions.tokenizer", "php84Extensions.xml", "php84Extensions.curl", "php84Extensions.gd", "php84Extensions.zip", "php84Extensions.bcmath", "composer"]
+nixPkgs = [
+  "php83",
+  "php83Packages.composer",
+  "php83Extensions.pdo",
+  "php83Extensions.pdo_sqlite",
+  "php83Extensions.pdo_pgsql",
+  "php83Extensions.sqlite3",
+  "php83Extensions.mbstring",
+  "php83Extensions.tokenizer",
+  "php83Extensions.xml",
+  "php83Extensions.curl",
+  "php83Extensions.gd",
+  "php83Extensions.zip",
+  "php83Extensions.bcmath",
+  "php83Extensions.openssl",
+  "php83Extensions.fileinfo"
+]
 
 [phases.install]
 cmds = [
-  "composer install --no-dev --optimize-autoloader --no-interaction",
+  "composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist",
   "mkdir -p database storage/framework/sessions storage/framework/views storage/framework/cache storage/logs bootstrap/cache",
   "touch database/database.sqlite",
   "chmod -R 775 storage bootstrap/cache database"
 ]
+
+[phases.build]
+cmds = ["echo 'Build PHP listo (sin Node/Vite)'"]
 
 [start]
 cmd = "bash start.sh"
