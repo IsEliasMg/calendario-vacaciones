@@ -47,6 +47,13 @@ class VacationController extends Controller
             $dates = [];
         }
 
+        /** @var Employee|null $employee */
+        $employee = request()->attributes->get('employee');
+
+        if ($employee && $request->filled('color') && preg_match('/^#[0-9A-Fa-f]{6}$/', (string) $request->input('color'))) {
+            $employee->update(['color' => strtoupper((string) $request->input('color'))]);
+        }
+
         try {
             $action->execute(new VacationData(
                 employeeId: (int) session('employee_id'),

@@ -41,6 +41,15 @@
             input.value = date;
             datesInputs.appendChild(input);
         });
+
+        let colorField = vacationForm.querySelector('input[name="color"]');
+        if (!colorField) {
+            colorField = document.createElement('input');
+            colorField.type = 'hidden';
+            colorField.name = 'color';
+            vacationForm.appendChild(colorField);
+        }
+        colorField.value = employeeColor;
     }
 
     function updateSelectedUI() {

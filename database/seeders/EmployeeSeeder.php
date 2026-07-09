@@ -21,7 +21,8 @@ class EmployeeSeeder extends Seeder
         ];
 
         foreach ($employees as $name) {
-            Employee::query()->updateOrCreate(
+            // firstOrCreate: no sobrescribe color ni datos de empleados ya existentes
+            Employee::query()->firstOrCreate(
                 ['name' => $name],
                 [
                     'color' => Employee::DEFAULT_COLOR,

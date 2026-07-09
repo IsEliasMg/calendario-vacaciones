@@ -57,7 +57,7 @@ git push -u origin main
 En el servicio de Railway → **Variables** → agrega:
 
 ```
-APP_NAME=Vacaciones Institucionales
+APP_NAME=Vacaciones RH
 APP_ENV=production
 APP_DEBUG=false
 APP_KEY=
@@ -67,6 +67,7 @@ SESSION_DRIVER=file
 CACHE_STORE=file
 QUEUE_CONNECTION=sync
 LOG_CHANNEL=stderr
+COMPOSER_ALLOW_SUPERUSER=1
 ```
 
 ### Generar APP_KEY

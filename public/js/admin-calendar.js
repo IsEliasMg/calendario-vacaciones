@@ -22,10 +22,10 @@
 
     function readFiltersFromForm() {
         return {
-            employee_id: document.getElementById('filter-employee').value || '',
-            month: document.getElementById('filter-month').value || '',
-            year: document.getElementById('filter-year').value || '',
-            search: (document.getElementById('filter-search').value || '').trim(),
+            employee_id: String(document.getElementById('filter-employee').value || ''),
+            month: String(document.getElementById('filter-month').value || ''),
+            year: String(document.getElementById('filter-year').value || ''),
+            search: String(document.getElementById('filter-search').value || '').trim(),
         };
     }
 
@@ -55,7 +55,7 @@
         const container = document.getElementById('color-legend');
         container.innerHTML = '';
 
-        data.employees
+        (data.employees || [])
             .filter(emp => !activeFilters.employee_id || String(emp.id) === String(activeFilters.employee_id))
             .filter(emp => !activeFilters.search || emp.name.toLowerCase().includes(activeFilters.search.toLowerCase()))
             .forEach(emp => {
@@ -75,10 +75,17 @@
     }
 
     function loadEvents(info, successCallback, failureCallback) {
-        const params = new URLSearchParams({
-            start: toDateKey(info.start),
-            end: toDateKey(info.end),
-        });
+        const params = new URLSearchParams();
+
+        // Si hay filtro de empleado o búsqueda, traer rango amplio para no perder días fuera del mes visible
+        if (activeFilters.employee_id || activeFilters.search) {
+            const year = activeFilters.year || String(new Date().getFullYear());
+            params.set('start', `${year}-01-01`);
+            params.set('end', `${Number(year) + 1}-12-31`);
+        } else {
+            params.set('start', toDateKey(info.start));
+            params.set('end', toDateKey(info.end));
+        }
 
         if (activeFilters.employee_id) {
             params.set('employee_id', activeFilters.employee_id);
@@ -88,12 +95,32 @@
             params.set('search', activeFilters.search);
         }
 
-        // Solo aplicar mes/año en la API si NO estamos navegando el calendario
-        // (cuando el usuario eligió mes explícitamente, movemos la vista)
+        if (activeFilters.month) {
+            params.set('month', activeFilters.month);
+        }
+
+        if (activeFilters.year) {
+            params.set('year', activeFilters.year);
+        }
+
         fetch(`${config.eventsUrl}?${params.toString()}`)
             .then(r => r.json())
             .then(data => {
                 let events = data.events || [];
+
+                // Refuerzo de filtros en cliente
+                if (activeFilters.employee_id) {
+                    events = events.filter(event =>
+                        String(event.extendedProps?.employeeId) === String(activeFilters.employee_id)
+                    );
+                }
+
+                if (activeFilters.search) {
+                    const q = activeFilters.search.toLowerCase();
+                    events = events.filter(event =>
+                        String(event.title || '').toLowerCase().includes(q)
+                    );
+                }
 
                 if (activeFilters.month) {
                     const month = String(activeFilters.month).padStart(2, '0');
@@ -106,7 +133,10 @@
 
                 successCallback(events);
             })
-            .catch(failureCallback);
+            .catch(err => {
+                console.error('Error cargando eventos', err);
+                failureCallback(err);
+            });
     }
 
     function initCalendar() {
@@ -152,20 +182,52 @@
             },
             eventDidMount: function (info) {
                 info.el.setAttribute('title', info.event.title);
+                // Asegurar color del empleado
+                const color = info.event.extendedProps.employeeColor || info.event.backgroundColor;
+                if (color) {
+                    info.el.style.backgroundColor = color;
+                    info.el.style.borderColor = color;
+                }
             },
         });
 
         calendar.render();
     }
 
-    function applyFilters() {
+    async function jumpToFirstFilteredEvent() {
+        if (!activeFilters.employee_id && !activeFilters.search) {
+            return;
+        }
+
+        const params = new URLSearchParams();
+        if (activeFilters.employee_id) params.set('employee_id', activeFilters.employee_id);
+        if (activeFilters.search) params.set('search', activeFilters.search);
+        if (activeFilters.month) params.set('month', activeFilters.month);
+        if (activeFilters.year) params.set('year', activeFilters.year);
+
+        try {
+            const response = await fetch(`${config.eventsUrl}?${params.toString()}`);
+            const data = await response.json();
+            const events = data.events || [];
+
+            if (events.length > 0) {
+                const sorted = [...events].sort((a, b) => String(a.start).localeCompare(String(b.start)));
+                calendar.gotoDate(sorted[0].start);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
+    async function applyFilters() {
         activeFilters = readFiltersFromForm();
 
-        // Solo mover el calendario si el usuario eligió mes (y opcionalmente año)
         if (activeFilters.month) {
             const year = activeFilters.year || String(new Date().getFullYear());
             calendar.gotoDate(`${year}-${String(activeFilters.month).padStart(2, '0')}-01`);
-        } else if (activeFilters.year && !activeFilters.employee_id && !activeFilters.search) {
+        } else if (activeFilters.employee_id || activeFilters.search) {
+            await jumpToFirstFilteredEvent();
+        } else if (activeFilters.year) {
             calendar.gotoDate(`${activeFilters.year}-01-01`);
         }
 
@@ -203,7 +265,10 @@
         document.getElementById('export-excel').href = `${config.exportExcelUrl}?${query}`;
     }
 
-    document.getElementById('apply-filters').addEventListener('click', applyFilters);
+    document.getElementById('apply-filters').addEventListener('click', function (e) {
+        e.preventDefault();
+        applyFilters();
+    });
     document.getElementById('filter-employee').addEventListener('change', applyFilters);
     document.getElementById('filter-month').addEventListener('change', applyFilters);
     document.getElementById('filter-year').addEventListener('change', applyFilters);
@@ -257,20 +322,9 @@
     });
 
     initCalendar();
-    activeFilters = readFiltersFromForm();
-    // Al inicio no forzar año como filtro activo si solo está preseleccionado visualmente
-    activeFilters.year = '';
+    activeFilters = { employee_id: '', month: '', year: '', search: '' };
     document.getElementById('filter-year').value = '';
     loadLegend();
     updateExportLinks();
     showFilterFeedback();
-
-    setInterval(() => {
-        calendar?.refetchEvents();
-        const view = calendar?.view;
-        if (view) {
-            fetchBlocked(toDateKey(view.currentStart), toDateKey(view.currentEnd));
-        }
-        loadLegend();
-    }, 30000);
 })();

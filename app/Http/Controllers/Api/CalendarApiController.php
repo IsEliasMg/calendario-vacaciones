@@ -29,33 +29,32 @@ class CalendarApiController extends Controller
 
         $query = Vacation::query()
             ->with('employee:id,name,color,status')
-            ->when($start !== '', fn ($q) => $q->whereDate('vacation_date', '>=', $start))
-            ->when($end !== '', fn ($q) => $q->whereDate('vacation_date', '<=', $end))
-            ->when($start === '' && $month > 0, fn ($q) => $q->whereMonth('vacation_date', $month))
-            ->when($start === '' && $year > 0, fn ($q) => $q->whereYear('vacation_date', $year))
             ->when($employeeId > 0, fn ($q) => $q->where('employee_id', $employeeId))
             ->when($search !== '', function ($q) use ($search): void {
                 $q->whereHas('employee', fn ($employeeQuery) => $employeeQuery->where('name', 'like', "%{$search}%"));
             })
+            ->when($month > 0, fn ($q) => $q->whereMonth('vacation_date', $month))
+            ->when($year > 0, fn ($q) => $q->whereYear('vacation_date', $year))
+            ->when($start !== '', fn ($q) => $q->whereDate('vacation_date', '>=', $start))
+            ->when($end !== '', fn ($q) => $q->whereDate('vacation_date', '<=', $end))
             ->when($since !== '', fn ($q) => $q->where('updated_at', '>=', Carbon::parse($since)));
 
-        $vacations = $query->orderBy('vacation_date')->get();
-
-        $events = $vacations->map(function (Vacation $vacation): array {
+        $events = $query->orderBy('vacation_date')->get()->map(function (Vacation $vacation): array {
             $employee = $vacation->employee;
+            $color = $employee?->color ?: '#9CA3AF';
 
             return [
                 'id' => $vacation->id,
                 'title' => $employee?->name ?? 'Empleado',
                 'start' => $vacation->vacation_date->format('Y-m-d'),
                 'allDay' => true,
-                'backgroundColor' => $employee?->color ?? '#4285F4',
-                'borderColor' => $employee?->color ?? '#4285F4',
+                'backgroundColor' => $color,
+                'borderColor' => $color,
                 'textColor' => '#ffffff',
                 'extendedProps' => [
                     'employeeId' => $vacation->employee_id,
                     'employeeName' => $employee?->name,
-                    'employeeColor' => $employee?->color,
+                    'employeeColor' => $color,
                 ],
             ];
         });

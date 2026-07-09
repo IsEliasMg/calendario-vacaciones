@@ -90,5 +90,5 @@ window.GuestCalendarConfig = {
     csrfToken: @json(csrf_token()),
 };
 </script>
-<script src="/js/guest-calendar.js?v=7"></script>
+<script src="/js/guest-calendar.js?v=8"></script>
 @endpush
