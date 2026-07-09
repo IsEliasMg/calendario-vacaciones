@@ -7,9 +7,7 @@
     <div class="col-md-6 col-lg-5">
         <div class="card-soft p-4 p-md-5">
             <div class="text-center mb-4">
-                <div class="stat-icon bg-primary-subtle text-primary mx-auto mb-3">
-                    <i class="bi bi-person-badge"></i>
-                </div>
+                <img src="/logoo.png" alt="Logo institucional" class="brand-logo brand-logo-guest mb-3">
                 <h2 class="h4 fw-semibold mb-2 brand-title">Bienvenido</h2>
                 <p class="text-muted mb-0">Escribe tu nombre completo para registrar o continuar con tus vacaciones</p>
             </div>
