@@ -136,5 +136,5 @@ document.getElementById('available_years_input')?.addEventListener('change', fun
     });
 });
 </script>
-<script src="{{ asset('js/admin-settings.js') }}"></script>
+<script src="/js/admin-settings.js?v=7"></script>
 @endpush

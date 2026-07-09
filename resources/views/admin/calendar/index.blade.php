@@ -99,5 +99,5 @@ window.AdminCalendarConfig = {
     csrfToken: @json(csrf_token()),
 };
 </script>
-<script src="{{ asset('js/admin-calendar.js') }}?v=6"></script>
+<script src="/js/admin-calendar.js?v=7"></script>
 @endpush

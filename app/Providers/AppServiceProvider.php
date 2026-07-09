@@ -9,6 +9,7 @@ use App\Domain\Vacation\Models\Vacation;
 use App\Policies\EmployeePolicy;
 use App\Policies\VacationPolicy;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -22,5 +23,9 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::policy(Employee::class, EmployeePolicy::class);
         Gate::policy(Vacation::class, VacationPolicy::class);
+
+        if ($this->app->environment('production')) {
+            URL::forceScheme('https');
+        }
     }
 }

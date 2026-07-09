@@ -18,6 +18,8 @@ if [ -z "$APP_KEY" ]; then
 fi
 
 php artisan config:clear || true
+php artisan view:clear || true
+php artisan route:clear || true
 php artisan migrate --force
 php artisan db:seed --force
 

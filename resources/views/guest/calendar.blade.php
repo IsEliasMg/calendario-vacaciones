@@ -90,5 +90,5 @@ window.GuestCalendarConfig = {
     csrfToken: @json(csrf_token()),
 };
 </script>
-<script src="{{ asset('js/guest-calendar.js') }}?v=6"></script>
+<script src="/js/guest-calendar.js?v=7"></script>
 @endpush

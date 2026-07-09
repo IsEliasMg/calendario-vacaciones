@@ -104,5 +104,5 @@ window.EmployeeAdminConfig = {
     historyUrl: @json(url('/admin/employees')),
 };
 </script>
-<script src="{{ asset('js/admin-employees.js') }}"></script>
+<script src="/js/admin-employees.js?v=7"></script>
 @endpush
