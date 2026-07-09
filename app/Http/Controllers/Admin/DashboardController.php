@@ -34,7 +34,7 @@ class DashboardController extends Controller
         $occupiedDays = Vacation::query()
             ->selectRaw('vacation_date, COUNT(*) as total')
             ->groupBy('vacation_date')
-            ->having('total', '>', 0)
+            ->havingRaw('COUNT(*) > 0')
             ->count();
 
         return view('admin.dashboard.index', compact(
