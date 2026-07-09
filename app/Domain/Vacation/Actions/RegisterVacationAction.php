@@ -50,7 +50,6 @@ class RegisterVacationAction
             foreach ($selectedDates as $dateString) {
                 $count = Vacation::query()
                     ->whereDate('vacation_date', $dateString)
-                    ->lockForUpdate()
                     ->count();
 
                 if ($count >= $settings->max_people_per_day) {
