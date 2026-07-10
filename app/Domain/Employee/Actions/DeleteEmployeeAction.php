@@ -10,6 +10,7 @@ class DeleteEmployeeAction
 {
     public function execute(Employee $employee): void
     {
+        $employee->vacations()->delete();
         $employee->delete();
     }
 }

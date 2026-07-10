@@ -25,11 +25,14 @@ class DashboardController extends Controller
             ->count();
 
         $upcomingVacations = Vacation::query()
-            ->with('employee')
+            ->with(['employee' => fn ($query) => $query->withTrashed()])
             ->whereDate('vacation_date', '>=', $today)
             ->orderBy('vacation_date')
-            ->limit(10)
-            ->get();
+            ->limit(30)
+            ->get()
+            ->filter(fn (Vacation $vacation) => $vacation->employee !== null)
+            ->take(10)
+            ->values();
 
         $occupiedDays = Vacation::query()
             ->selectRaw('vacation_date, COUNT(*) as total')
