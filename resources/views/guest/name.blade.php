@@ -22,7 +22,6 @@
                         name="name"
                         class="form-control form-control-lg @error('name') is-invalid @enderror"
                         value="{{ old('name') }}"
-                        placeholder="Elias González"
                         autofocus
                         required
                     >
