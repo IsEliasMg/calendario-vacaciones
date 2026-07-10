@@ -75,14 +75,11 @@
                     @foreach ($upcomingVacations as $vacation)
                         <tr>
                             <td>
-                                <span class="legend-color" style="background: {{ $vacation->employee?->color ?? '#9CA3AF' }}"></span>
-                                {{ $vacation->employee?->name ?? 'Empleado eliminado' }}
-                                @if ($vacation->employee?->trashed())
-                                    <small class="text-muted">(eliminado)</small>
-                                @endif
+                                <span class="legend-color" style="background: {{ $vacation->employee->color }}"></span>
+                                {{ $vacation->employee->name }}
                             </td>
                             <td>{{ $vacation->vacation_date->format('d/m/Y') }}</td>
-                            <td class="text-muted">{{ $vacation->created_at->format('d/m/Y H:i') }}</td>
+                            <td class="text-muted">{{ $vacation->created_at->timezone('America/Mexico_City')->format('d/m/Y H:i') }}</td>
                         </tr>
                     @endforeach
                 </tbody>
