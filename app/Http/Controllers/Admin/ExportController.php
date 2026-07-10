@@ -46,7 +46,7 @@ class ExportController extends Controller
 
     /**
      * @return array{
-     *     weeks: array<int, array<int, array{date: Carbon, inMonth: bool, isToday: bool, employees: Collection}>>,
+     *     weeks: array<int, array<int, array{date: Carbon, inMonth: bool, employees: Collection}>>,
      *     weekDays: array<int, string>,
      *     filters: string,
      *     monthLabel: string,
@@ -100,13 +100,12 @@ class ExportController extends Controller
 
     /**
      * @param  Collection<string, Collection>  $byDate
-     * @return array<int, array<int, array{date: Carbon, inMonth: bool, isToday: bool, employees: Collection}>>
+     * @return array<int, array<int, array{date: Carbon, inMonth: bool, employees: Collection}>>
      */
     private function buildMonthWeeks(Carbon $monthStart, Collection $byDate): array
     {
         $cursor = $monthStart->copy()->startOfWeek(Carbon::MONDAY);
         $end = $monthStart->copy()->endOfMonth()->endOfWeek(Carbon::SUNDAY);
-        $today = Carbon::today()->toDateString();
         $weeks = [];
         $week = [];
 
@@ -116,7 +115,6 @@ class ExportController extends Controller
             $week[] = [
                 'date' => $cursor->copy(),
                 'inMonth' => $cursor->month === $monthStart->month,
-                'isToday' => $key === $today,
                 'employees' => $byDate->get($key, collect()),
             ];
 
