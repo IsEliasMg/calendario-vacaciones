@@ -156,7 +156,10 @@ return [
     |
     */
 
-    'domain' => env('SESSION_DOMAIN'),
+    // Railway a veces guarda SESSION_DOMAIN="null" como texto; eso rompe las cookies.
+    'domain' => (($domain = env('SESSION_DOMAIN')) === null || $domain === '' || $domain === 'null')
+        ? null
+        : $domain,
 
     /*
     |--------------------------------------------------------------------------

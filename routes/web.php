@@ -32,10 +32,8 @@ Route::prefix('api/calendar')->name('api.calendar.')->group(function (): void {
 });
 
 Route::prefix('admin')->name('admin.')->group(function (): void {
-    Route::middleware('guest:admin')->group(function (): void {
-        Route::get('/login', [LoginController::class, 'create'])->name('login');
-        Route::post('/login', [LoginController::class, 'store'])->name('login.store');
-    });
+    Route::get('/login', [LoginController::class, 'create'])->name('login');
+    Route::post('/login', [LoginController::class, 'store'])->name('login.store');
 
     Route::middleware(AdminAuthenticated::class)->group(function (): void {
         Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');

@@ -12,13 +12,21 @@ use Illuminate\View\View;
 
 class LoginController extends Controller
 {
-    public function create(): View
+    public function create(): View|RedirectResponse
     {
+        if (Auth::guard('admin')->check()) {
+            return redirect()->route('admin.dashboard');
+        }
+
         return view('admin.auth.login');
     }
 
     public function store(Request $request): RedirectResponse
     {
+        if (Auth::guard('admin')->check()) {
+            return redirect()->route('admin.dashboard');
+        }
+
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
@@ -30,6 +38,8 @@ class LoginController extends Controller
             ])->onlyInput('email');
         }
 
+        // Evita mezclar sesión de trabajador con la del admin
+        $request->session()->forget('employee_id');
         $request->session()->regenerate();
 
         return redirect()->intended(route('admin.dashboard'));

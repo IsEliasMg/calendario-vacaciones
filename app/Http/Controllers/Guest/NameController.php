@@ -10,12 +10,18 @@ use App\Domain\Employee\Models\Employee;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Guest\LookupEmployeeRequest;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 class NameController extends Controller
 {
     public function create(): View
     {
+        // Si había sesión de admin abierta, no la mezclamos con el flujo de trabajador
+        if (Auth::guard('admin')->check()) {
+            Auth::guard('admin')->logout();
+        }
+
         return view('guest.name');
     }
 
@@ -37,7 +43,12 @@ class NameController extends Controller
                 ->withErrors(['name' => 'Tu cuenta está bloqueada. Contacta al administrador.']);
         }
 
-        session(['employee_id' => $employee->id]);
+        if (Auth::guard('admin')->check()) {
+            Auth::guard('admin')->logout();
+        }
+
+        $request->session()->regenerate();
+        $request->session()->put('employee_id', $employee->id);
 
         return redirect()->route('guest.vacations.create');
     }
