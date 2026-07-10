@@ -31,6 +31,18 @@
 
     function buildQuery(extra = {}) {
         const filters = { ...activeFilters, ...extra };
+
+        // Si no hay mes/año en filtros, usar el mes visible en el calendario
+        if (calendar) {
+            const visible = calendar.getDate();
+            if (!filters.month) {
+                filters.month = String(visible.getMonth() + 1);
+            }
+            if (!filters.year) {
+                filters.year = String(visible.getFullYear());
+            }
+        }
+
         const params = new URLSearchParams();
         Object.entries(filters).forEach(([key, value]) => {
             if (value !== null && value !== undefined && String(value).trim() !== '') {
@@ -173,6 +185,7 @@
             events: loadEvents,
             datesSet: function (info) {
                 fetchBlocked(toDateKey(info.start), toDateKey(info.end));
+                updateExportLinks();
             },
             eventClick: function (info) {
                 selectedVacationId = info.event.id;

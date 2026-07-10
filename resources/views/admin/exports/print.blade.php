@@ -2,46 +2,91 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Calendario de Vacaciones</title>
+    <title>Calendario de Vacaciones — {{ $monthLabel }}</title>
     <style>
-        body { font-family: Arial, sans-serif; color: #1f2937; margin: 24px; }
-        h1 { font-size: 22px; margin-bottom: 4px; color: #1a73e8; }
-        .subtitle { color: #6b7280; margin-bottom: 20px; }
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
+        body {
+            font-family: Arial, sans-serif;
+            color: #1f2937;
+            margin: 20px;
         }
-        .day-card {
-            border: 1px solid #e5e7eb;
-            border-radius: 10px;
-            min-height: 110px;
-            padding: 8px;
-            page-break-inside: avoid;
+        h1 {
+            font-size: 22px;
+            margin: 0 0 4px 0;
+            color: #6B1D2A;
+        }
+        .subtitle {
+            color: #6b7280;
+            margin-bottom: 16px;
+            font-size: 13px;
+        }
+        table.calendar {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+        }
+        table.calendar th {
+            background: #6B1D2A;
+            color: #fff;
+            font-size: 12px;
+            padding: 8px 4px;
+            text-align: center;
+            border: 1px solid #4a1420;
+        }
+        table.calendar td {
+            border: 1px solid #d1d5db;
+            vertical-align: top;
+            height: 100px;
+            padding: 6px;
+            width: 14.28%;
+        }
+        td.out-month {
+            background: #f3f4f6;
+            color: #9ca3af;
+        }
+        td.today {
+            background: #fef9c3;
         }
         .day-number {
             font-weight: 700;
             font-size: 13px;
+            margin-bottom: 4px;
+            text-align: right;
+            color: #374151;
+        }
+        td.out-month .day-number { color: #9ca3af; }
+        .tag {
+            display: block;
+            color: #fff;
+            border-radius: 4px;
+            padding: 3px 5px;
+            font-size: 10px;
+            margin-bottom: 3px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .legend {
+            margin-top: 16px;
+            font-size: 12px;
+        }
+        .legend-item {
+            display: inline-block;
+            margin-right: 14px;
             margin-bottom: 6px;
         }
-        .tag {
+        .legend-dot {
             display: inline-block;
-            color: #fff;
-            border-radius: 999px;
-            padding: 2px 8px;
-            font-size: 11px;
-            margin: 2px 2px 0 0;
-            font-weight: 600;
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            margin-right: 4px;
+            vertical-align: middle;
         }
-        .empty { color: #9ca3af; font-size: 12px; }
-        .list-section { margin-top: 28px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; font-size: 12px; }
-        th { background: #f3f4f6; }
-        .color-dot { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: middle; }
         @media print {
             body { margin: 0; }
             .no-print { display: none !important; }
+            table.calendar td { height: 90px; }
         }
     </style>
 </head>
@@ -51,43 +96,44 @@
     </div>
 
     <h1>Calendario de Vacaciones</h1>
-    <div class="subtitle">{{ $monthLabel }} — {{ $filters }}</div>
+    <div class="subtitle">{{ ucfirst($monthLabel) }} — {{ $filters }}</div>
 
-    @if ($days->isEmpty())
-        <p class="empty">No hay vacaciones para los filtros seleccionados.</p>
-    @else
-        <div class="calendar-grid">
-            @foreach ($days as $day)
-                <div class="day-card">
-                    <div class="day-number">{{ $day['date']->translatedFormat('d M') }}</div>
-                    @foreach ($day['employees'] as $employee)
-                        <span class="tag" style="background: {{ $employee['color'] }}">{{ $employee['name'] }}</span>
+    <table class="calendar">
+        <thead>
+            <tr>
+                @foreach ($weekDays as $dayName)
+                    <th>{{ $dayName }}</th>
+                @endforeach
+            </tr>
+        </thead>
+        <tbody>
+            @foreach ($weeks as $week)
+                <tr>
+                    @foreach ($week as $day)
+                        <td class="{{ ! $day['inMonth'] ? 'out-month' : '' }} {{ $day['isToday'] ? 'today' : '' }}">
+                            <div class="day-number">{{ $day['date']->day }}</div>
+                            @if ($day['inMonth'])
+                                @foreach ($day['employees'] as $employee)
+                                    <span class="tag" style="background: {{ $employee['color'] }}">
+                                        {{ $employee['name'] }}
+                                    </span>
+                                @endforeach
+                            @endif
+                        </td>
                     @endforeach
-                </div>
+                </tr>
             @endforeach
-        </div>
+        </tbody>
+    </table>
 
-        <div class="list-section">
-            <h2 style="font-size: 16px;">Detalle</h2>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Empleado</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($vacations as $vacation)
-                        <tr>
-                            <td>{{ $vacation->vacation_date->format('d/m/Y') }}</td>
-                            <td>
-                                <span class="color-dot" style="background: {{ $vacation->employee->color ?? '#4285F4' }}"></span>
-                                {{ $vacation->employee->name ?? 'N/A' }}
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+    @if ($legend->isNotEmpty())
+        <div class="legend">
+            @foreach ($legend as $item)
+                <span class="legend-item">
+                    <span class="legend-dot" style="background: {{ $item['color'] }}"></span>
+                    {{ $item['name'] }}
+                </span>
+            @endforeach
         </div>
     @endif
 </body>

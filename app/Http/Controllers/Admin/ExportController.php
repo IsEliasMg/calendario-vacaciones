@@ -45,38 +45,96 @@ class ExportController extends Controller
     }
 
     /**
-     * @return array{vacations: Collection, days: Collection, filters: string, monthLabel: string}
+     * @return array{
+     *     weeks: array<int, array<int, array{date: Carbon, inMonth: bool, isToday: bool, employees: Collection}>>,
+     *     weekDays: array<int, string>,
+     *     filters: string,
+     *     monthLabel: string,
+     *     legend: Collection
+     * }
      */
     private function exportPayload(Request $request): array
     {
-        $vacations = $this->filteredVacations($request);
+        $monthStart = $this->resolveMonthStart($request);
+        $monthEnd = $monthStart->copy()->endOfMonth();
 
-        $days = $vacations
+        $vacations = $this->filteredVacations($request, $monthStart, $monthEnd);
+
+        $byDate = $vacations
             ->groupBy(fn (Vacation $vacation) => $vacation->vacation_date->format('Y-m-d'))
-            ->sortKeys()
-            ->map(function (Collection $items, string $date) {
-                return [
-                    'date' => Carbon::parse($date),
-                    'employees' => $items->map(fn (Vacation $vacation) => [
+            ->map(function (Collection $items) {
+                return $items
+                    ->map(fn (Vacation $vacation) => [
                         'name' => $vacation->employee?->name ?? 'N/A',
-                        'color' => $vacation->employee?->color ?? '#4285F4',
-                    ])->unique('name')->values(),
-                ];
-            })
+                        'color' => $vacation->employee?->color ?? '#9CA3AF',
+                    ])
+                    ->unique('name')
+                    ->values();
+            });
+
+        $legend = $vacations
+            ->map(fn (Vacation $vacation) => [
+                'name' => $vacation->employee?->name ?? 'N/A',
+                'color' => $vacation->employee?->color ?? '#9CA3AF',
+            ])
+            ->unique('name')
+            ->sortBy('name')
             ->values();
 
         return [
-            'vacations' => $vacations,
-            'days' => $days,
+            'weeks' => $this->buildMonthWeeks($monthStart, $byDate),
+            'weekDays' => ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'],
             'filters' => $this->filtersLabel($request),
-            'monthLabel' => $this->monthLabel($request),
+            'monthLabel' => $monthStart->translatedFormat('F Y'),
+            'legend' => $legend,
         ];
+    }
+
+    private function resolveMonthStart(Request $request): Carbon
+    {
+        $year = $request->integer('year') ?: (int) date('Y');
+        $month = $request->integer('month') ?: (int) date('n');
+
+        return Carbon::create($year, $month, 1)->startOfDay();
+    }
+
+    /**
+     * @param  Collection<string, Collection>  $byDate
+     * @return array<int, array<int, array{date: Carbon, inMonth: bool, isToday: bool, employees: Collection}>>
+     */
+    private function buildMonthWeeks(Carbon $monthStart, Collection $byDate): array
+    {
+        $cursor = $monthStart->copy()->startOfWeek(Carbon::MONDAY);
+        $end = $monthStart->copy()->endOfMonth()->endOfWeek(Carbon::SUNDAY);
+        $today = Carbon::today()->toDateString();
+        $weeks = [];
+        $week = [];
+
+        while ($cursor->lte($end)) {
+            $key = $cursor->toDateString();
+
+            $week[] = [
+                'date' => $cursor->copy(),
+                'inMonth' => $cursor->month === $monthStart->month,
+                'isToday' => $key === $today,
+                'employees' => $byDate->get($key, collect()),
+            ];
+
+            if (count($week) === 7) {
+                $weeks[] = $week;
+                $week = [];
+            }
+
+            $cursor->addDay();
+        }
+
+        return $weeks;
     }
 
     /**
      * @return Collection<int, Vacation>
      */
-    private function filteredVacations(Request $request): Collection
+    private function filteredVacations(Request $request, ?Carbon $from = null, ?Carbon $to = null): Collection
     {
         $employeeId = $request->integer('employee_id');
         $month = $request->integer('month');
@@ -85,9 +143,10 @@ class ExportController extends Controller
 
         return Vacation::query()
             ->with('employee')
+            ->when($from && $to, fn ($q) => $q->whereBetween('vacation_date', [$from->toDateString(), $to->toDateString()]))
+            ->when(! $from && $month > 0, fn ($q) => $q->whereMonth('vacation_date', $month))
+            ->when(! $from && $year > 0, fn ($q) => $q->whereYear('vacation_date', $year))
             ->when($employeeId > 0, fn ($q) => $q->where('employee_id', $employeeId))
-            ->when($month > 0, fn ($q) => $q->whereMonth('vacation_date', $month))
-            ->when($year > 0, fn ($q) => $q->whereYear('vacation_date', $year))
             ->when($search !== '', function ($q) use ($search): void {
                 $q->whereHas('employee', fn ($employeeQuery) => $employeeQuery->where('name', 'like', "%{$search}%"));
             })
@@ -106,30 +165,10 @@ class ExportController extends Controller
             }
         }
 
-        if ($request->filled('month')) {
-            $parts[] = 'Mes: '.$request->integer('month');
-        }
-
-        if ($request->filled('year')) {
-            $parts[] = 'Año: '.$request->integer('year');
-        }
-
         if ($request->filled('search')) {
             $parts[] = 'Búsqueda: '.$request->string('search');
         }
 
-        return $parts === [] ? 'Todos los registros' : implode(' | ', $parts);
-    }
-
-    private function monthLabel(Request $request): string
-    {
-        $year = $request->integer('year') ?: (int) date('Y');
-        $month = $request->integer('month');
-
-        if ($month > 0) {
-            return Carbon::create($year, $month, 1)->translatedFormat('F Y');
-        }
-
-        return (string) $year;
+        return $parts === [] ? 'Todas las vacaciones del mes' : implode(' | ', $parts);
     }
 }
