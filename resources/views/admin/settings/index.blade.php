@@ -118,10 +118,10 @@
 <script>
 window.SettingsAdminConfig = {
     csrfToken: @json(csrf_token()),
-    holidayStoreUrl: @json(route('admin.settings.holidays.store')),
-    holidayDeleteUrl: @json(url('/admin/settings/holidays')),
-    blockedStoreUrl: @json(route('admin.settings.blocked-dates.store')),
-    blockedDeleteUrl: @json(url('/admin/settings/blocked-dates')),
+    holidayStoreUrl: @json(route('admin.settings.holidays.store', absolute: false)),
+    holidayDeleteUrl: '/admin/settings/holidays',
+    blockedStoreUrl: @json(route('admin.settings.blocked-dates.store', absolute: false)),
+    blockedDeleteUrl: '/admin/settings/blocked-dates',
 };
 
 document.getElementById('available_years_input')?.addEventListener('change', function () {
@@ -136,5 +136,5 @@ document.getElementById('available_years_input')?.addEventListener('change', fun
     });
 });
 </script>
-<script src="/js/admin-settings.js?v=7"></script>
+<script src="/js/admin-settings.js?v=8"></script>
 @endpush

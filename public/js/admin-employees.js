@@ -9,12 +9,23 @@
         toast.show();
     }
 
+    async function parseResponse(response) {
+        const text = await response.text();
+        try {
+            return text ? JSON.parse(text) : {};
+        } catch {
+            throw new Error('Sesión expirada o error del servidor. Recarga la página e intenta de nuevo.');
+        }
+    }
+
     async function request(url, method, body) {
         const options = {
             method,
+            credentials: 'same-origin',
             headers: {
                 'X-CSRF-TOKEN': config.csrfToken,
                 'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
             },
         };
 
@@ -24,7 +35,7 @@
         }
 
         const response = await fetch(url, options);
-        const data = await response.json();
+        const data = await parseResponse(response);
 
         if (!response.ok) {
             const message = data.message || Object.values(data.errors || {}).flat().join(' ');
@@ -112,9 +123,13 @@
     document.querySelectorAll('.history-employee-btn').forEach(btn => {
         btn.addEventListener('click', async function () {
             const response = await fetch(`${config.historyUrl}/${this.dataset.id}/history`, {
-                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
             });
-            const data = await response.json();
+            const data = await parseResponse(response);
             document.getElementById('history-employee-name').textContent = data.employee.name;
 
             const content = document.getElementById('history-content');

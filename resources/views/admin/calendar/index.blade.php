@@ -89,15 +89,15 @@
 <script>
 window.AdminCalendarConfig = {
     calendarConfig: @json($calendarConfig),
-    eventsUrl: @json(route('api.calendar.events')),
-    blockedUrl: @json(route('api.calendar.blocked-dates')),
-    legendUrl: @json(route('api.calendar.legend')),
-    deleteVacationUrl: @json(url('/admin/vacations')),
-    exportPrintUrl: @json(route('admin.exports.print')),
-    exportPdfUrl: @json(route('admin.exports.pdf')),
-    exportExcelUrl: @json(route('admin.exports.excel')),
+    eventsUrl: @json(route('api.calendar.events', absolute: false)),
+    blockedUrl: @json(route('api.calendar.blocked-dates', absolute: false)),
+    legendUrl: @json(route('api.calendar.legend', absolute: false)),
+    deleteVacationUrl: '/admin/vacations',
+    exportPrintUrl: @json(route('admin.exports.print', absolute: false)),
+    exportPdfUrl: @json(route('admin.exports.pdf', absolute: false)),
+    exportExcelUrl: @json(route('admin.exports.excel', absolute: false)),
     csrfToken: @json(csrf_token()),
 };
 </script>
-<script src="/js/admin-calendar.js?v=9"></script>
+<script src="/js/admin-calendar.js?v=10"></script>
 @endpush

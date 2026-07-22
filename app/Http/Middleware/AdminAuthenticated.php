@@ -13,6 +13,10 @@ class AdminAuthenticated
     public function handle(Request $request, Closure $next): Response
     {
         if (! auth('admin')->check()) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Sesión expirada. Vuelve a iniciar sesión.'], 401);
+            }
+
             return redirect()->route('admin.login');
         }
 

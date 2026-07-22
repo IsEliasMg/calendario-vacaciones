@@ -9,16 +9,41 @@ use Illuminate\Database\Seeder;
 
 class AdminSeeder extends Seeder
 {
+    /**
+     * @var list<string>
+     */
+    private const ALLOWED_EMAILS = [
+        'administrador@laboratoriocoahuila.com',
+        'direcciongeneral@laboratoriocoahuila.com',
+    ];
+
     public function run(): void
     {
-        if (Admin::query()->where('email', 'admin@calendario.test')->exists()) {
-            return;
-        }
+        $admins = [
+            [
+                'name' => 'Administrador',
+                'email' => 'administrador@laboratoriocoahuila.com',
+                'password' => '@administracionrh',
+            ],
+            [
+                'name' => 'Direccion General',
+                'email' => 'direcciongeneral@laboratoriocoahuila.com',
+                'password' => '@administracionrh',
+            ],
+        ];
 
-        Admin::query()->create([
-            'name' => 'Administradora',
-            'email' => 'admin@calendario.test',
-            'password' => 'password',
-        ]);
+        Admin::query()
+            ->whereNotIn('email', self::ALLOWED_EMAILS)
+            ->delete();
+
+        foreach ($admins as $admin) {
+            Admin::query()->updateOrCreate(
+                ['email' => $admin['email']],
+                [
+                    'name' => $admin['name'],
+                    'password' => $admin['password'],
+                ]
+            );
+        }
     }
 }

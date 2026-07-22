@@ -306,9 +306,11 @@
 
         const response = await fetch(`${config.deleteVacationUrl}/${selectedVacationId}`, {
             method: 'DELETE',
+            credentials: 'same-origin',
             headers: {
                 'X-CSRF-TOKEN': config.csrfToken,
                 'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
             },
         });
 

@@ -96,13 +96,13 @@
 <script>
 window.EmployeeAdminConfig = {
     csrfToken: @json(csrf_token()),
-    storeUrl: @json(route('admin.employees.store')),
-    updateUrl: @json(url('/admin/employees')),
-    deleteUrl: @json(url('/admin/employees')),
-    blockUrl: @json(url('/admin/employees')),
-    reactivateUrl: @json(url('/admin/employees')),
-    historyUrl: @json(url('/admin/employees')),
+    storeUrl: @json(route('admin.employees.store', absolute: false)),
+    updateUrl: '/admin/employees',
+    deleteUrl: '/admin/employees',
+    blockUrl: '/admin/employees',
+    reactivateUrl: '/admin/employees',
+    historyUrl: '/admin/employees',
 };
 </script>
-<script src="/js/admin-employees.js?v=7"></script>
+<script src="/js/admin-employees.js?v=8"></script>
 @endpush

@@ -15,15 +15,31 @@
             <form action="{{ route('admin.login.store') }}" method="POST">
                 @csrf
                 <div class="mb-3">
-                    <label for="email" class="form-label">Correo electrónico</label>
-                    <input type="email" id="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" required autofocus>
+                    <label for="email" class="form-label">Usuario</label>
+                    <select
+                        id="email"
+                        name="email"
+                        class="form-select @error('email') is-invalid @enderror"
+                        required
+                        autofocus
+                    >
+                        <option value="" disabled @selected(! old('email'))>Selecciona tu usuario</option>
+                        @foreach ($admins as $admin)
+                            <option value="{{ $admin->email }}" @selected(old('email') === $admin->email)>
+                                {{ $admin->name }}
+                            </option>
+                        @endforeach
+                    </select>
                     @error('email')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Contraseña</label>
-                    <input type="password" id="password" name="password" class="form-control" required>
+                    <input type="password" id="password" name="password" class="form-control @error('password') is-invalid @enderror" required>
+                    @error('password')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
                 <div class="form-check mb-4">
                     <input type="checkbox" class="form-check-input" id="remember" name="remember">

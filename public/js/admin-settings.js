@@ -1,12 +1,23 @@
 (function () {
     const config = window.SettingsAdminConfig;
 
+    async function parseResponse(response) {
+        const text = await response.text();
+        try {
+            return text ? JSON.parse(text) : {};
+        } catch {
+            throw new Error('Sesión expirada o error del servidor. Recarga la página e intenta de nuevo.');
+        }
+    }
+
     async function request(url, method, body) {
         const options = {
             method,
+            credentials: 'same-origin',
             headers: {
                 'X-CSRF-TOKEN': config.csrfToken,
                 'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
             },
         };
 
@@ -16,10 +27,10 @@
         }
 
         const response = await fetch(url, options);
-        const data = await response.json();
+        const data = await parseResponse(response);
 
         if (!response.ok) {
-            throw new Error(Object.values(data.errors || {}).flat().join(' ') || 'Error');
+            throw new Error(Object.values(data.errors || {}).flat().join(' ') || data.message || 'Error');
         }
 
         return data;

@@ -4,21 +4,36 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Admin\Auth;
 
+use App\Domain\Admin\Models\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class LoginController extends Controller
 {
+    /**
+     * @var list<string>
+     */
+    private const LOGIN_EMAILS = [
+        'administrador@laboratoriocoahuila.com',
+        'direcciongeneral@laboratoriocoahuila.com',
+    ];
+
     public function create(): View|RedirectResponse
     {
         if (Auth::guard('admin')->check()) {
             return redirect()->route('admin.dashboard');
         }
 
-        return view('admin.auth.login');
+        $admins = Admin::query()
+            ->whereIn('email', self::LOGIN_EMAILS)
+            ->orderBy('name')
+            ->get(['email', 'name']);
+
+        return view('admin.auth.login', compact('admins'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -28,7 +43,7 @@ class LoginController extends Controller
         }
 
         $credentials = $request->validate([
-            'email' => ['required', 'email'],
+            'email' => ['required', 'email', Rule::in(self::LOGIN_EMAILS)],
             'password' => ['required', 'string'],
         ]);
 
